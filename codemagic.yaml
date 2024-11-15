@@ -5,4 +5,37 @@ workflows:
             ios_signing:
                 distribution_type: enterprise # or: ad_hoc | development | enterprise
                 bundle_identifier: com.badpiggies.cheats
+            groups:
+                - auth
         instance_type: mac_mini_m2
+        scripts:
+            - name: Set up code signing settings on Xcode project
+            script: xcode-project use-profiles
+
+            - name: Activate Unity license
+            script: | 
+                $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile \
+                -serial ${UNITY_SERIAL} \
+                -username ${UNITY_EMAIL} \
+                -password ${UNITY_PASSWORD}
+            
+            - name: Generate the Xcode project from Unity
+            script: | 
+                $UNITY_HOME/Contents/MacOS/Unity -batchmode \
+                -quit \
+                -logFile \
+                -projectPath . \
+                -executeMethod BuildScript.BuildIos \
+                -nographics
+            - name: Set up code signing settings on Xcode project
+            script: | 
+                xcode-project use-profiles
+            - name: Set the build number
+            script: #...
+            - name: Build the project
+            script: | 
+                xcode-project build-ipa --project "$UNITY_IOS_DIR/$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+        artifacts:
+            paths:
+                - build/ios/ipa/*.ipa
+                - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
