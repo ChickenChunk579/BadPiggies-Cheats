@@ -1,0 +1,8 @@
+workflows:
+    sample-workflow:
+        name: Codemagic iOS build
+        environment:
+            ios_signing:
+                distribution_type: enterprise # or: ad_hoc | development | enterprise
+                bundle_identifier: com.badpiggies.cheats
+        instance_type: mac_mini_m2
